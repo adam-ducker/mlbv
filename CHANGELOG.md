@@ -1,3 +1,8 @@
+2025.05.26 v0.0.21 Use ffmpeg on-the-fly encoding to save (--fetch'd) games
+    in compressed mp4 format. Increases save speed by ~30x and
+    decreases file size by 90% at 1080p resolution. Also allow configurable
+    ffmpeg binary (for hardware encoding, for example) in config file. 
+
 2022.03.28 v0.0.19 Merge 'recent' pull requests, rework bits of login
 - Issue 53: retry login on certain failure scenarios
 

@@ -301,6 +301,9 @@ def main():
         "-D", "--debug", action="store_true", help=argparse.SUPPRESS
     )  # help="Turn on debug output")
     parser.add_argument(
+        "--no-evi", action="store_true", help=argparse.SUPPRESS
+    )  # help="Disable EVI (i.e. superimposed virtual ads)"
+    parser.add_argument(
         "--cache", help=argparse.SUPPRESS
     )  # normal, never, forever, ...
     args = parser.parse_args()
@@ -512,6 +515,7 @@ def main():
         args.fetch,
         args.from_start,
         args.inning,
+	args.no_evi
     )
 
 

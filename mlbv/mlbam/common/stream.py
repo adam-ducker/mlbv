@@ -147,9 +147,9 @@ def streamlink(
         "Authorization=" + mlb_session.access_token,
         "--http-header",
         user_agent_hdr,
-        "--hls-timeout",
+        "--stream-timeout",
         "600",  # default: 60
-        "--hls-segment-timeout",
+        "--stream-segment-timeout",
         "60",
     ]  # default: 10
     if from_start:
@@ -177,9 +177,7 @@ def streamlink(
         # prematurely after the stream is fully fetched
         streamlink_cmd.append("--player-no-close")
     if fetch_filename:
-        fetch_filename = _uniquify_fetch_filename(fetch_filename)
-        streamlink_cmd.append("--output")
-        streamlink_cmd.append(fetch_filename)
+        streamlink_cmd.append("--stdout")
     elif video_player:
         LOG.debug("Using video_player: %s", video_player)
         streamlink_cmd.append("--player")
@@ -206,10 +204,25 @@ def streamlink(
     streamlink_cmd.append(_get_resolution())
 
     LOG.debug("Playing: %s", str(streamlink_cmd))
-    proc = subprocess.run(streamlink_cmd, check=False)
-    if proc.returncode != 0:
-        LOG.error("Non-zero exit code from streamlink: %s", proc.returncode)
-    return proc.returncode
+    proc = subprocess.Popen(streamlink_cmd, stdout=subprocess.PIPE)
+    proc2 = subprocess.Popen(
+        [
+            config.FFMPEG,
+            '-hide_banner',
+            "-i",
+            "-",
+            "-c",
+            "copy",
+            _uniquify_fetch_filename(fetch_filename).replace('.ts', '.mp4')
+        ],
+        stdin=proc.stdout,
+        stdout=subprocess.PIPE
+    )
+    proc.stdout.close()
+    _, error = proc2.communicate()
+    if error is not None:
+        LOG.error("Non-zero exit code from streamlink: %s", error)
+    return error
 
 
 def play_audio(stream_url):
