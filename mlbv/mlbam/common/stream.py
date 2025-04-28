@@ -28,7 +28,7 @@ def _get_resolution():
     """
     resolution = config.CONFIG.parser.get("resolution", "720p_alt")
     if "best" in resolution:
-        resolution = resolution.replace("best", "720p_alt")
+        resolution = resolution.replace("best", "720p_alt") # Potentially new 1080p resolution?
         LOG.info(
             "Workaround for issue #12: resolution 'best' is manually converted: %s",
             resolution,
