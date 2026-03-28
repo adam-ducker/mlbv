@@ -34,6 +34,7 @@ SAVE_JSON_FILE = True
 SAVE_PLAYLIST_FILE = False
 UNICODE = True
 DEFAULT_STREAM_START_OFFSET_SECS = 0
+NO_EVI = False
 
 LOG = logging.getLogger(__name__)
 
@@ -64,6 +65,8 @@ class Config:
         VERIFY_SSL = self.parser.getboolean("verify_ssl", VERIFY_SSL)
         global UNICODE
         UNICODE = self.parser.getboolean("unicode", UNICODE)
+        global NO_EVI
+        NO_EVI = self.parser.getboolean("no_evi", NO_EVI) or args.no_evi
         if DEBUG:
             # Turn on some extras
             global SAVE_PLAYLIST_FILE

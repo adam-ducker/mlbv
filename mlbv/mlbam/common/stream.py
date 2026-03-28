@@ -132,7 +132,7 @@ def streamlink_highlight(playback_url, fetch_filename, is_multi_highlight=False)
 
 
 def streamlink(
-    stream_url, mlb_session, fetch_filename=None, from_start=False, offset=None
+    stream_url, mlb_session, fetch_filename=None, record=False, from_start=False, offset=None
 ):
     LOG.debug("Stream url: %s", stream_url)
     # media_auth_cookie_str = access_token
@@ -147,9 +147,9 @@ def streamlink(
         "Authorization=" + mlb_session.access_token,
         "--http-header",
         user_agent_hdr,
-        "--hls-timeout",
+        "--stream-timeout",
         "600",  # default: 60
-        "--hls-segment-timeout",
+        "--stream-segment-timeout",
         "60",
     ]  # default: 10
     if from_start:
@@ -176,16 +176,19 @@ def streamlink(
         # the --playe-no-close is required so it doesn't shut things down
         # prematurely after the stream is fully fetched
         streamlink_cmd.append("--player-no-close")
-    if fetch_filename:
-        fetch_filename = _uniquify_fetch_filename(fetch_filename)
-        streamlink_cmd.append("--output")
-        streamlink_cmd.append(fetch_filename)
-    elif video_player:
+    if video_player:
         LOG.debug("Using video_player: %s", video_player)
         streamlink_cmd.append("--player")
         streamlink_cmd.append(video_player)
         if config.CONFIG.parser.getboolean("streamlink_passthrough", False):
             streamlink_cmd.append("--player-passthrough=hls")
+    if fetch_filename:
+        fetch_filename = _uniquify_fetch_filename(fetch_filename)
+        if record:
+            streamlink_cmd.append("--record")
+        else:
+            streamlink_cmd.append("--output")
+        streamlink_cmd.append(fetch_filename)
 
     streamlink_hls_audio_select = config.CONFIG.parser["streamlink_hls_audio_select"]
     if streamlink_hls_audio_select:

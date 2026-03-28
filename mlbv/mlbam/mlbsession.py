@@ -207,44 +207,44 @@ class MLBSession(session.Session):
         assert self._state["OKTA_ACCESS_TOKEN"] is not None
 
         # Device Assertion
-        devices_headers = {
-            "Authorization": "Bearer %s" % (self.client_api_key),
-            "Origin": "https://www.mlb.com",
-        }
+        # devices_headers = {
+        #     "Authorization": "Bearer %s" % (self.client_api_key),
+        #     "Origin": "https://www.mlb.com",
+        # }
 
-        devices_params = {
-            "applicationRuntime": "firefox",
-            "attributes": {},
-            "deviceFamily": "browser",
-            "deviceProfile": "macosx",
-        }
+        # devices_params = {
+        #     "applicationRuntime": "firefox",
+        #     "attributes": {},
+        #     "deviceFamily": "browser",
+        #     "deviceProfile": "macosx",
+        # }
 
-        devices_response = self.session.post(
-            BAM_DEVICES_URL, headers=devices_headers, json=devices_params
-        ).json()
+        # devices_response = self.session.post(
+        #     BAM_DEVICES_URL, headers=devices_headers, json=devices_params
+        # ).json()
 
         # Issue #53: no assertion key here:
-        if "assertion" in devices_response:
-            devices_assertion = devices_response["assertion"]
-        else:
-            devices_assertion = None
-            LOG.error("No assertion key in devices response")
-            LOG.debug("No assertion key in devices response: %s", devices_response.text)
+        # if "assertion" in devices_response:
+        #     devices_assertion = devices_response["assertion"]
+        # else:
+        #     devices_assertion = None
+        #     LOG.error("No assertion key in devices response")
+        #     LOG.debug("No assertion key in devices response: %s", devices_response.text)
 
         # Device token
-        token_params = {
-            "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
-            "latitude": "0",
-            "longitude": "0",
-            "platform": "browser",
-            "subject_token": devices_assertion,
-            "subject_token_type": "urn:bamtech:params:oauth:token-type:device",
-        }
-        token_response = self.session.post(
-            BAM_TOKEN_URL, headers=devices_headers, data=token_params
-        ).json()
+        # token_params = {
+        #     "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
+        #     "latitude": "0",
+        #     "longitude": "0",
+        #     "platform": "browser",
+        #     "subject_token": devices_assertion,
+        #     "subject_token_type": "urn:bamtech:params:oauth:token-type:device",
+        # }
+        # token_response = self.session.post(
+        #     BAM_TOKEN_URL, headers=devices_headers, data=token_params
+        # ).json()
 
-        device_access_token = token_response["access_token"]
+        # device_access_token = token_response["access_token"]
 
         # # Create session
         # session_headers = {
@@ -268,50 +268,50 @@ class MLBSession(session.Session):
         device_id, session_id = self._create_session()
 
         # Entitlement token
-        entitlement_params = {"os": PLATFORM, "did": device_id, "appname": "mlbtv_web"}
-
-        entitlement_headers = {
-            "Authorization": "Bearer %s" % (self._state["OKTA_ACCESS_TOKEN"]),
-            "Origin": "https://www.mlb.com",
-            # TODO: is api_key correct?  always None?
-            "x-api-key": self._state["api_key"],
-        }
-        entitlement_response = self.session.get(
-            BAM_ENTITLEMENT_URL, headers=entitlement_headers, params=entitlement_params
-        )
-
-        entitlement_token = entitlement_response.content
+        # entitlement_params = {"os": PLATFORM, "did": device_id, "appname": "mlbtv_web"}
+        #
+        # entitlement_headers = {
+        #     "Authorization": "Bearer %s" % (self._state["OKTA_ACCESS_TOKEN"]),
+        #     "Origin": "https://www.mlb.com",
+        #     # TODO: is api_key correct?  always None?
+        #     "x-api-key": self._state["api_key"],
+        # }
+        # entitlement_response = self.session.get(
+        #     BAM_ENTITLEMENT_URL, headers=entitlement_headers, params=entitlement_params
+        # )
+        #
+        # entitlement_token = entitlement_response.content
 
         # Get access token
-        headers = {
-            "Authorization": "Bearer %s" % self._state["client_api_key"],
-            "User-agent": USER_AGENT,
-            "Accept": "application/vnd.media-service+json; version=1",
-            "x-bamsdk-version": BAM_SDK_VERSION,
-            "x-bamsdk-platform": PLATFORM,
-            "origin": "https://www.mlb.com",
-        }
-        data = {
-            "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
-            "platform": "browser",
-            "subject_token": entitlement_token,
-            "subject_token_type": "urn:bamtech:params:oauth:token-type:account",
-        }
-        response = self.session.post(BAM_TOKEN_URL, data=data, headers=headers)
+        # headers = {
+        #     "Authorization": "Bearer %s" % self._state["client_api_key"],
+        #     "User-agent": USER_AGENT,
+        #     "Accept": "application/vnd.media-service+json; version=1",
+        #     "x-bamsdk-version": BAM_SDK_VERSION,
+        #     "x-bamsdk-platform": PLATFORM,
+        #     "origin": "https://www.mlb.com",
+        # }
+        # data = {
+        #     "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
+        #     "platform": "browser",
+        #     "subject_token": entitlement_token,
+        #     "subject_token_type": "urn:bamtech:params:oauth:token-type:account",
+        # }
+        # response = self.session.post(BAM_TOKEN_URL, data=data, headers=headers)
         # from requests_toolbelt.utils import dump
         # print(dump.dump_all(response).decode("utf-8"))
-        response.raise_for_status()
-        token_response = response.json()
-        if config.VERBOSE:
-            LOG.debug("token_response: %s", token_response)
+        # response.raise_for_status()
+        # token_response = response.json()
+        # if config.VERBOSE:
+        #    LOG.debug("token_response: %s", token_response)
 
         # Finally: update the token and expiry in our _state:
-        self._state["access_token_expiry"] = str(
-            datetime.datetime.now(tz=pytz.UTC)
-            + datetime.timedelta(seconds=token_response["expires_in"])
-        )
-        self._state["access_token"] = token_response["access_token"]
-        self.save()
+        # self._state["access_token_expiry"] = str(
+        #    datetime.datetime.now(tz=pytz.UTC)
+        #    + datetime.timedelta(seconds=token_response["expires_in"])
+        # )
+        # self._state["access_token"] = token_response["access_token"]
+        # self.save()
 
     def get_game_content(self, game_pk):
         self._refresh_access_token()
@@ -343,7 +343,7 @@ class MLBSession(session.Session):
         return j['data']['contentSearch']['content']
 
     # Override
-    def lookup_stream_url(self, game_pk, media_id):
+    def lookup_stream_url(self, game_pk, media_id, no_evi):
         """game_pk: game_pk
         media_id: mediaPlaybackId
         """
@@ -392,6 +392,8 @@ class MLBSession(session.Session):
             LOG.error("Could not load stream\n%s", stream)
             return None
         stream_url = stream['data']['initPlaybackSession']['playback']['url']
+        if no_evi:
+            stream_url = re.sub("(/|-)(evi|EVI)", "", stream_url)
         return stream_url
 
     def _create_session(self):
